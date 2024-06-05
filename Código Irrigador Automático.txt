@@ -1,0 +1,69 @@
+#define setPoint       50						//Parâmetro para controle da umidade
+#define tempoLigado    2500						//Tempo de permanência ligado
+#define tempoDesligado 500						//Tempo de permanência desligado
+#define pinSensor      A0   					//Pino sensor
+#define pinRele        2						//Pino relé
+#define pinBotao       3						//Pino botão
+
+int  leSensor, umidade; 						//Variaveis
+bool leBotao=1;
+
+//=======================================================================================================//
+void ligaRele(){								//Função que liga o relé
+  digitalWrite(pinRele, LOW);
+  delay(tempoLigado);
+  }
+//------------------------------
+void desligaRele(){								//Função que desliga o relé
+  digitalWrite(pinRele, HIGH);
+  delay(tempoDesligado);
+  }
+//------------------------------
+void leituraSensor(){  							//Função que recebe a leitura do sensor e converte em % de umidade
+  leSensor=analogRead(pinSensor);
+  umidade=map(leSensor, 0, 876, 0, 100);
+  }
+
+//------------------------------
+void leituraBotao(){							//Função que lê o botão
+  leBotao=digitalRead(pinBotao);
+  }
+//------------------------------
+void controle(){								//Função que liga ou desliga o Relé
+    if((umidade<=setPoint)||(leBotao==0)){
+        ligaRele();
+   }else{
+        desligaRele();
+    }}
+//------------------------------  
+void serialMonitor(){							//Função que imprime no Monitor Serial
+  Serial.print("Rele: ");
+  Serial.print(!digitalRead(pinRele));
+  Serial.print("    ");
+  Serial.print("Analogico: ");
+  Serial.print(leSensor);
+  Serial.print("    ");
+  Serial.print("umidade: ");
+  Serial.print(umidade);
+  Serial.print("%");
+  Serial.print("    ");
+  Serial.print("BOTAO: ");
+  Serial.print(!leBotao);
+  Serial.println();  
+}
+//=======================================================================================================//
+
+void setup(){
+  digitalWrite (pinRele,          HIGH);		//Inicia com o pino em High(relé desligado)
+  pinMode 	   (pinSensor,       INPUT);		//Declara como entrada
+  pinMode 	   (pinRele,        OUTPUT);		//Declara como saída
+  pinMode      (pinBotao, INPUT_PULLUP);		//Declara como entrada
+  Serial.begin (9600);							//Inicia comunicação Serial
+}
+
+void loop(){
+  leituraSensor	();								//Chama função de leitura do Sensor
+  leituraBotao	();								//Chama função de leitura do Botão
+  controle		();								//Chama função que liga ou desliga relé
+  serialMonitor	();								//Chama função que imprime no Serial Monitor
+}
